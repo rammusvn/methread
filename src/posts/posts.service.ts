@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -20,8 +21,21 @@ export class PostsService {
   }
 
   async findOneById(id: number): Promise<Post | null> {
-    return await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOneBy({ id });
+    if (!post) {
+      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+    }
+    return post;
   }
+  async findAllByUserId(userId: number): Promise<Post[]> {
+    return await this.postRepository.find({
+      where: { author_id: userId },
+      relations: {
+        author: true,
+      },
+    });
+  }
+
   async create(content: string, userId: number): Promise<Post> {
     try {
       const author = await this.userService.findOne(userId);
@@ -38,5 +52,20 @@ export class PostsService {
       console.log(error);
       throw new HttpException('failed to create post', 500);
     }
+  }
+
+  async update(postId: number, updatePostDto: UpdatePostDto, userId: number) {
+    const post = await this.postRepository.findOneBy({ id: postId });
+    if (!post) {
+      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+    }
+    if (post.author_id !== userId) {
+      throw new HttpException(
+        'You are not the author of this post',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    Object.assign(post, updatePostDto);
+    return await this.postRepository.save(post);
   }
 }
