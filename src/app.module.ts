@@ -24,6 +24,8 @@ import { PostsModule } from './posts/posts.module';
 import KeyvRedis from '@keyv/redis';
 import * as Joi from 'joi';
 import { Post } from './posts/entities/post.entity';
+import { Like } from './likes/entities/like.entity';
+import { LikesModule } from './likes/likes.module';
 @Module({
   imports: [
     AuthModule,
@@ -73,13 +75,14 @@ import { Post } from './posts/entities/post.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [User, Post],
+        entities: [User, Post, Like],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
     FilesModule,
     PostsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -4,12 +4,14 @@ import { Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { LikesService } from 'src/likes/like.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly userService: UsersService,
+    private readonly likeService: LikesService,
   ) {}
   async findAll(): Promise<Post[]> {
     return await this.postRepository.find({
@@ -66,6 +68,32 @@ export class PostsService {
       );
     }
     Object.assign(post, updatePostDto);
+    return await this.postRepository.save(post);
+  }
+
+  async toggleLike(postId: number, userId: number) {
+    const res = await this.likeService.toggle(postId, userId);
+    if (res) {
+      await this.increaseLikeCount(postId);
+    } else {
+      await this.decreaseLikeCount(postId);
+    }
+  }
+
+  async increaseLikeCount(postId: number) {
+    const post = await this.postRepository.findOneBy({ id: postId });
+    if (!post) {
+      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+    }
+    post.likes_count += 1;
+    return await this.postRepository.save(post);
+  }
+  async decreaseLikeCount(postId: number) {
+    const post = await this.postRepository.findOneBy({ id: postId });
+    if (!post) {
+      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+    }
+    post.likes_count -= 1;
     return await this.postRepository.save(post);
   }
 }

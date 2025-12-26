@@ -1,5 +1,5 @@
-import { post } from 'axios';
 import { Role } from 'src/common/enums/role.enum';
+import { Like } from 'src/likes/entities/like.entity';
 import { Post } from 'src/posts/entities/post.entity';
 import {
   Column,
@@ -41,4 +41,7 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  likes: Like[];
 }

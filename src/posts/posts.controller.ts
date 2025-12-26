@@ -46,4 +46,12 @@ export class PostsController {
   ) {
     return this.postsService.update(id, updatePostDto, CurrentUser.id);
   }
+  @Post('/:id/like')
+  @UseGuards(JwtAuthGuard)
+  toggleLike(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() CurrentUser,
+  ) {
+    return this.postsService.toggleLike(id, CurrentUser.id);
+  }
 }
