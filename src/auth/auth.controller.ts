@@ -37,6 +37,12 @@ export class AuthController {
     return { message: 'Login successfuls' };
   }
 
+  @Post('logout')
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('access_token');
+    return { message: 'Logout successful' };
+  }
+
   @Get('mezon')
   @ApiExcludeEndpoint()
   @UseGuards(MezonAuthGuard)

@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { GetUserDto } from './dto/get-user.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CurrentUser } from 'src/common/decorators/user.decoratos';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -39,6 +40,11 @@ export class UsersController {
   @ApiOperation({ summary: 'Retrieve all users' })
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
+  }
+
+  @Get('/me')
+  findInfo(@CurrentUser() currentUser) {
+    return currentUser;
   }
 
   @Get('/:id')
