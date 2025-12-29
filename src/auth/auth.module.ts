@@ -5,13 +5,14 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MezonStrategy } from './strategies/mezon.strategy';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy, MezonStrategy],
   imports: [
     UsersModule,
+    ConfigModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

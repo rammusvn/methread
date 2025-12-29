@@ -15,9 +15,13 @@ import { ApiBody, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { RegisterDto } from './dto/register.dto';
 import type { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('/register')
   register(@Body() registerDto: RegisterDto) {
@@ -34,7 +38,7 @@ export class AuthController {
       httpOnly: true,
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 24 hours
     });
-    return { message: 'Login successfuls' };
+    return response.status(200).send({ message: 'Login successful' });
   }
 
   @Post('logout')
@@ -51,7 +55,12 @@ export class AuthController {
   @Get('mezon/callback')
   @ApiExcludeEndpoint()
   @UseGuards(MezonAuthGuard)
-  mezonCallBack(@Req() req) {
-    return this.authService.login(req.user);
+  mezonCallBack(@Req() req, @Res({ passthrough: true }) response: Response) {
+    const { access_token } = this.authService.login(req.user);
+    response.cookie('access_token', access_token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 24 hours
+    });
+    return response.redirect(this.configService.get<string>('CLIENT_URL')!);
   }
 }

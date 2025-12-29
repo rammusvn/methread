@@ -39,6 +39,7 @@ export class MezonStrategy extends PassportStrategy(Strategy, 'mezon') {
       const newUser: CreateUserDto = {
         email: userInfo.data.email as string,
         username: userInfo.data.username as string,
+        image: userInfo.data.avatar as string,
       };
       const createdUser = await this.userService.create(newUser);
       return createdUser;
