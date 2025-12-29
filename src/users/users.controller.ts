@@ -26,7 +26,6 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 import { CurrentUser } from 'src/common/decorators/user.decoratos';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
 @UseInterceptors(CacheInterceptor)
 @ApiBearerAuth('access-token')
 export class UsersController {
@@ -43,6 +42,7 @@ export class UsersController {
   }
 
   @Get('/me')
+  @UseGuards(JwtAuthGuard)
   findInfo(@CurrentUser() currentUser) {
     return currentUser;
   }
@@ -58,6 +58,7 @@ export class UsersController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     type: GetUserDto,
   })
@@ -69,6 +70,7 @@ export class UsersController {
     return result;
   }
   @Patch('/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({
     type: GetUserDto,
   })
@@ -85,6 +87,7 @@ export class UsersController {
   })
   @ApiOperation({ summary: 'Delete user by ID' })
   @Delete('/:id')
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id', ParseIntPipe) id: number) {
     const user = await this.usersService.remove(id);
     return user;

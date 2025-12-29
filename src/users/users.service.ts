@@ -22,7 +22,8 @@ export class UsersService {
     if (!user) {
       throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     }
-    return user;
+    const { password, ...returnUser } = user;
+    return returnUser;
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
