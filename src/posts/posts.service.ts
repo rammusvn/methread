@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { LikesService } from 'src/likes/like.service';
@@ -19,12 +19,15 @@ export class PostsService {
     const { cursor, limit = 6 } = query;
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
+      .where('post.parent_id is null')
       .orderBy('post.id', 'DESC')
       .take(limit + 1)
       .leftJoin('post.author', 'author')
       .addSelect(['author.id', 'author.username', 'author.image']);
     if (cursor) {
-      queryBuilder.where('post.id < :cursor', { cursor });
+      queryBuilder.andWhere(' post.id < :cursor', {
+        cursor,
+      });
     }
     const posts = await queryBuilder.getMany();
     const hasNextPage = posts.length > limit;
@@ -40,7 +43,19 @@ export class PostsService {
   }
 
   async findOneById(id: number): Promise<Post | null> {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: {
+        author: true,
+      },
+      select: {
+        author: {
+          id: true,
+          username: true,
+          image: true,
+        },
+      },
+    });
     if (!post) {
       throw new HttpException('post not found', HttpStatus.NOT_FOUND);
     }
@@ -52,6 +67,13 @@ export class PostsService {
       relations: {
         author: true,
       },
+      select: {
+        author: {
+          id: true,
+          username: true,
+          image: true,
+        },
+      },
     });
   }
 
@@ -60,6 +82,13 @@ export class PostsService {
       where: { parent_id: parentId },
       relations: {
         author: true,
+      },
+      select: {
+        author: {
+          id: true,
+          username: true,
+          image: true,
+        },
       },
     });
   }
