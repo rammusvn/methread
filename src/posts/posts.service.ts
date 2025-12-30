@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { LikesService } from 'src/likes/like.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { GetPostsDto } from './dto/get-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -14,19 +15,28 @@ export class PostsService {
     private readonly userService: UsersService,
     private readonly likeService: LikesService,
   ) {}
-  async findAll(): Promise<Post[]> {
-    return await this.postRepository.find({
-      take: 20,
-      order: {
-        created_at: 'DESC',
-      },
-      relations: {
-        author: true,
-      },
-      where: {
-        parent_id: IsNull(),
-      },
-    });
+  async findAll(query: GetPostsDto) {
+    const { cursor, limit = 6 } = query;
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .orderBy('post.id', 'DESC')
+      .take(limit + 1)
+      .leftJoin('post.author', 'author')
+      .addSelect(['author.id', 'author.username', 'author.image']);
+    if (cursor) {
+      queryBuilder.where('post.id < :cursor', { cursor });
+    }
+    const posts = await queryBuilder.getMany();
+    const hasNextPage = posts.length > limit;
+    if (hasNextPage) {
+      posts.pop();
+    }
+    const nextCursor = hasNextPage ? posts[posts.length - 1].id : null;
+    return {
+      posts: posts,
+      nextCursor,
+      hasNextPage,
+    };
   }
 
   async findOneById(id: number): Promise<Post | null> {

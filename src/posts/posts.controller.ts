@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
@@ -13,14 +14,16 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CurrentUser } from 'src/common/decorators/user.decoratos';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { GetPostsDto } from './dto/get-post.dto';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get('')
-  async findAll() {
-    return await this.postsService.findAll();
+  async findAll(@Query() query: GetPostsDto) {
+    console.log(query);
+    return await this.postsService.findAll(query);
   }
   @Get('/:id')
   async findOneById(@Param('id', ParseIntPipe) id: number) {
