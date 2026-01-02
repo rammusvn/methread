@@ -15,7 +15,6 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { loggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from './common/exception-filters/http-exception.filter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FilesModule } from './files/files.module';
@@ -23,13 +22,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { PostsModule } from './posts/posts.module';
 import KeyvRedis from '@keyv/redis';
 import * as Joi from 'joi';
-import { Post } from './posts/entities/post.entity';
-import { Like } from './likes/entities/like.entity';
 import { LikesModule } from './likes/likes.module';
 import { FollowModule } from './follow/follow.module';
-import { Follow } from './follow/dto/follow.entity';
 import { MediaModule } from './media/media.module';
-import { Media } from './media/entities/media.entity';
 @Module({
   imports: [
     AuthModule,
@@ -79,7 +74,7 @@ import { Media } from './media/entities/media.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [User, Post, Like, Follow, Media],
+        autoLoadEntities: true,
         synchronize: true,
       }),
       inject: [ConfigService],
