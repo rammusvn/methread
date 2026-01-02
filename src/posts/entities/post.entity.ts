@@ -1,4 +1,5 @@
 import { Like } from 'src/likes/entities/like.entity';
+import { Media } from 'src/media/entities/media.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -46,4 +47,7 @@ export class Post {
 
   @Column({ default: 0 })
   replies_count: number;
+
+  @OneToMany(() => Media, (media) => media.post)
+  media: Media[];
 }
