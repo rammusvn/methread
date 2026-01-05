@@ -11,7 +11,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   CurrentUser,
   type CurrentUserData,
-} from 'src/common/decorators/user.decoratos';
+} from 'src/common/decorators/user.decorator';
 
 @Controller('follow')
 export class FollowController {

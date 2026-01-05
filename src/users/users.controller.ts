@@ -26,7 +26,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   CurrentUser,
   type CurrentUserData,
-} from 'src/common/decorators/user.decoratos';
+} from 'src/common/decorators/user.decorator';
 
 @Controller('users')
 @UseInterceptors(CacheInterceptor)

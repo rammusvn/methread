@@ -18,7 +18,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import {
   CurrentUser,
   type CurrentUserData,
-} from 'src/common/decorators/user.decoratos';
+} from 'src/common/decorators/user.decorator';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { GetPostsDto } from './dto/get-post.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';

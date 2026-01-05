@@ -85,6 +85,7 @@ export class PostsService {
       where: { parent_id: parentId },
       relations: {
         author: true,
+        media: true,
       },
       select: {
         author: {
