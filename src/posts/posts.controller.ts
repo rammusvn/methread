@@ -37,8 +37,10 @@ export class PostsController {
     return await this.postsService.findOneById(id);
   }
   @Get('/users/:userId')
-  async findAllByUserId(@Param('userId', ParseIntPipe) userId: number) {
-    return await this.postsService.findAllByUserId(userId);
+  async findAllParentPostByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return await this.postsService.findAllParentPostByUserId(userId);
   }
   @Get('/:id/replies')
   async findAllByParentId(@Param('id', ParseIntPipe) id: number) {

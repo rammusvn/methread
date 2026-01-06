@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { LikesService } from 'src/likes/like.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -67,6 +67,21 @@ export class PostsService {
   async findAllByUserId(userId: number): Promise<Post[]> {
     return await this.postRepository.find({
       where: { author_id: userId },
+      relations: {
+        author: true,
+      },
+      select: {
+        author: {
+          id: true,
+          username: true,
+          image: true,
+        },
+      },
+    });
+  }
+  async findAllParentPostByUserId(userId: number): Promise<Post[]> {
+    return await this.postRepository.find({
+      where: { author_id: userId, parent_id: IsNull() },
       relations: {
         author: true,
       },
