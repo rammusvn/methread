@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
@@ -103,7 +103,7 @@ export class UsersService {
     return await this.userRepository.find({
       where: [
         {
-          username: Like(`%${query}%`),
+          username: ILike(`%${query}%`),
         },
       ],
       select: ['id', 'username', 'bio', 'image'],
