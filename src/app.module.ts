@@ -25,10 +25,16 @@ import * as Joi from 'joi';
 import { LikesModule } from './likes/likes.module';
 import { FollowModule } from './follow/follow.module';
 import { MediaModule } from './media/media.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    FilesModule,
+    PostsModule,
+    LikesModule,
+    FollowModule,
+    MediaModule,
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) => {
@@ -79,11 +85,16 @@ import { MediaModule } from './media/media.module';
       }),
       inject: [ConfigService],
     }),
-    FilesModule,
-    PostsModule,
-    LikesModule,
-    FollowModule,
-    MediaModule,
+    ClientsModule.register([
+      {
+        name: 'REDIS_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: 'localhost',
+          port: 6379,
+        },
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [
