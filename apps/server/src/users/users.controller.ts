@@ -24,14 +24,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { GetUserDto } from './dto/get-user.dto';
-import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   CurrentUser,
   type CurrentUserData,
 } from '../common/decorators/user.decorator';
 
 @Controller('users')
-@UseInterceptors(CacheInterceptor)
 @ApiBearerAuth('access-token')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

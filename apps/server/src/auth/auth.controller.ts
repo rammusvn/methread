@@ -38,7 +38,7 @@ export class AuthController {
       httpOnly: true,
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 24 hours
     });
-    return response.status(200).send({ message: 'Login successful' });
+    return { message: 'Login successful' };
   }
 
   @Post('logout')
@@ -55,7 +55,7 @@ export class AuthController {
   @Get('mezon/callback')
   @ApiExcludeEndpoint()
   @UseGuards(MezonAuthGuard)
-  mezonCallBack(@Req() req, @Res({ passthrough: true }) response: Response) {
+  mezonCallBack(@Req() req, @Res() response: Response) {
     const { access_token } = this.authService.login(req.user);
     response.cookie('access_token', access_token, {
       httpOnly: true,
