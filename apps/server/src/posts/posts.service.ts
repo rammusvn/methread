@@ -86,6 +86,7 @@ export class PostsService {
       where: { author_id: userId, parent_id: IsNull() },
       relations: {
         author: true,
+        media: true,
       },
       select: {
         author: {
@@ -93,6 +94,9 @@ export class PostsService {
           username: true,
           image: true,
         },
+      },
+      order: {
+        id: 'DESC',
       },
     });
   }
