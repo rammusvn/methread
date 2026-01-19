@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../../common/enums/role.enum';
-import { Follow } from '../../follow/dto/follow.entity';
+import { Follow } from '../../follow/entities/follow.entity';
 import { Post } from '../../posts/entities/post.entity';
 import { SavedPost } from '../../reaction/save/entities/save.entity';
 import { Like } from '../../reaction/likes/entities/like.entity';

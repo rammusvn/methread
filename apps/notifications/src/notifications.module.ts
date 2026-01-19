@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from 'apps/server/src/posts/entities/post.entity';
 import { ConfigModule } from '@nestjs/config';
 import { User } from 'apps/server/src/users/entities/user.entity';
-import { Follow } from 'apps/server/src/follow/dto/follow.entity';
+import { Follow } from 'apps/server/src/follow/entities/follow.entity';
 import { Media } from 'apps/server/src/media/entities/media.entity';
 import { GatewayModule } from './gateway/gateway.module';
 

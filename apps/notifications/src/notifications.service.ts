@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Follow } from 'apps/server/src/follow/dto/follow.entity';
+import { Follow } from 'apps/server/src/follow/entities/follow.entity';
 import { Repository } from 'typeorm';
 import { NotificationsGateway } from './gateway/notification.gateway';
 
