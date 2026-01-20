@@ -31,4 +31,7 @@ export class Follow {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @Column({ default: true })
+  is_following: boolean;
 }
