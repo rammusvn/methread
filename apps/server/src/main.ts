@@ -11,13 +11,13 @@ async function bootstrap() {
       : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
   app.enableCors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL,
     credentials: true,
   }); // port for front-end
   app.use(cookieParser());
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || 'your_secret_key',
+      secret: process.env.SESSION_SECRET!,
       cookie: { maxAge: 3600000 },
       resave: false,
       saveUninitialized: false,
