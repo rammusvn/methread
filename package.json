@@ -24,7 +24,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/server/test/jest-e2e.json",
-    "prepare": "cd .. && husky server/.husky"
+    "prepare": "cd .. && husky server/.husky",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "migration:gen": "npm run typeorm -- migration:generate -d libs/database/config/typeorm.ts libs/database/migrations/migration",
+    "migration:create": "npm run typeorm -- migration:create libs/database/migrations/$npm_config_name",
+    "migration:revert": "npm run typeorm -- migration:revert -d libs/database/config/typeorm.ts ",
+    "migration:run": "npm run typeorm -- migration:run -d libs/database/config/typeorm.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.947.0",
@@ -53,6 +58,7 @@
     "cloudinary": "^2.8.0",
     "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
     "express-session": "^1.18.2",
     "husky": "^9.1.7",
     "ioredis": "^5.9.0",

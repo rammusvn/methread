@@ -1,5 +1,3 @@
-import { Post } from 'apps/server/src/posts/entities/post.entity';
-import { User } from 'apps/server/src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -8,6 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from '../../../users/entities/user.entity';
+import { Post } from '../../../posts/entities/post.entity';
 
 @Entity('saved_post')
 export class SavedPost {
