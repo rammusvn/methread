@@ -33,7 +33,6 @@ export class PostsController {
 
   @Get('')
   async findAll(@Query() query: GetPostsDto) {
-    console.log(query);
     return await this.postsService.findAll(query);
   }
   @Get('/saved')

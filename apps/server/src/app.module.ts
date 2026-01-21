@@ -25,6 +25,7 @@ import { FollowModule } from './follow/follow.module';
 import { MediaModule } from './media/media.module';
 import { DatabaseModule } from '@app/database';
 import { ReactionModule } from './reaction/reaction.module';
+import { LoggerModule } from './common/logger/logger.module';
 @Module({
   imports: [
     AuthModule,
@@ -35,6 +36,7 @@ import { ReactionModule } from './reaction/reaction.module';
     MediaModule,
     DatabaseModule,
     ReactionModule,
+    LoggerModule,
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) => {
@@ -79,10 +81,10 @@ import { ReactionModule } from './reaction/reaction.module';
       useClass: AuthGuard,
     },
     AppService,
-    // {
-    //   provide: APP_PIPE,
-    //   useClass: FreezePipe,
-    // },
+    {
+      provide: APP_PIPE,
+      useClass: FreezePipe,
+    },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
