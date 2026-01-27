@@ -4,3 +4,18 @@ export const CLIENTS = {
 export const EVENTS = {
   POST_CREATED: 'POST_CREATED',
 };
+export const CMD = {
+  GET_NOTIFICATION: 'GET_NOTIFICATION',
+  MARK_AS_READ: 'MARK_AS_READ',
+  MARK_ALL_AS_READ: 'MARK_ALL_AS_READ',
+};
+
+export const QUEUES = {
+  NOTIFICATION_QUEUE: 'NOTIFICATION_QUEUE',
+};
+
+export const JOBS = {
+  NEW_POST: 'NEW_POST',
+  LIKE_POST: 'LIKE_POST',
+  COMMENT_POST: 'COMMENT_POST',
+};

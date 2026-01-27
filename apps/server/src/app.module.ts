@@ -24,7 +24,8 @@ import { FollowModule } from './follow/follow.module';
 import { MediaModule } from './media/media.module';
 import { DatabaseModule } from '@app/database';
 import { ReactionModule } from './reaction/reaction.module';
-import { LoggerModule } from './common/logger/logger.module';
+import { LoggerModule } from '../../../libs/common/src/logger/logger.module';
+import { NotificationsModule } from './notifications/notifications.module';
 @Module({
   imports: [
     AuthModule,
@@ -48,9 +49,9 @@ import { LoggerModule } from './common/logger/logger.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'product', 'test').default('dev'),
+        NODE_ENV: Joi.string().valid('dev', 'product', 'test').required(),
 
-        PORT: Joi.number().port().default(3000),
+        PORT: Joi.number().port().required(),
 
         JWT_SECRET: Joi.string().min(5).required(),
 
@@ -71,6 +72,7 @@ import { LoggerModule } from './common/logger/logger.module';
         MEZON_USER_URL: Joi.string().uri().required(),
       }),
     }),
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
