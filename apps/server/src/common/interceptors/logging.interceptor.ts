@@ -7,7 +7,7 @@ import {
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { LoggerService } from '../logger/my-logger.service';
+import { LoggerService } from '../../../../../libs/common/src/logger/my-logger.service';
 
 @Injectable()
 export class loggingInterceptor implements NestInterceptor {
@@ -29,7 +29,6 @@ export class loggingInterceptor implements NestInterceptor {
         statusCode: context.switchToHttp().getResponse().statusCode,
         timestamp: new Date().toISOString(),
         path: request.url,
-        headers: request.headers,
       })),
     );
   }

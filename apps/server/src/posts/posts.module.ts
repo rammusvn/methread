@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { FilesModule } from '../files/files.module';
 import { MediaModule } from '../media/media.module';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { CLIENTS } from 'apps/constants';
 import { ReactionModule } from '../reaction/reaction.module';
+import { BullModule } from '@nestjs/bullmq';
+import { QUEUES } from 'apps/constants';
 
 @Module({
   controllers: [PostsController],
@@ -17,13 +17,9 @@ import { ReactionModule } from '../reaction/reaction.module';
     FilesModule,
     MediaModule,
     ReactionModule,
-    ClientsModule.register([
-      {
-        name: CLIENTS.NOTIFICATION_SERVICE,
-        transport: Transport.REDIS,
-        options: { host: 'localhost', port: 6379 },
-      },
-    ]),
+    BullModule.registerQueue({
+      name: QUEUES.NOTIFICATION_QUEUE,
+    }),
   ],
 })
 export class PostsModule {}

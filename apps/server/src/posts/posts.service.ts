@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { DataSource, IsNull, Repository } from 'typeorm';
@@ -6,9 +6,10 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsDto } from './dto/get-post.dto';
 import { MediaService } from '../media/media.service';
-import { ClientProxy } from '@nestjs/microservices';
-import { CLIENTS, EVENTS } from 'apps/constants';
+import { JOBS, QUEUES } from 'apps/constants';
 import { LikesService } from '../reaction/likes/like.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class PostsService {
@@ -17,8 +18,8 @@ export class PostsService {
     private readonly likeService: LikesService,
     private readonly mediaService: MediaService,
     private readonly dataSource: DataSource,
-    @Inject(CLIENTS.NOTIFICATION_SERVICE)
-    private readonly client: ClientProxy,
+    @InjectQueue(QUEUES.NOTIFICATION_QUEUE)
+    private readonly notificationQueue: Queue,
   ) {}
   async findAll(query: GetPostsDto) {
     const { cursor, limit = 6 } = query;
@@ -140,7 +141,6 @@ export class PostsService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
     try {
       if (createPostDto.parent_id) {
         const parent = await this.postRepository.findOneBy({
@@ -166,7 +166,16 @@ export class PostsService {
       await queryRunner.commitTransaction();
       if (!createPostDto.parent_id) {
         const sentData = await this.findOneById(newPost.id);
-        this.client.emit(EVENTS.POST_CREATED, { post: sentData });
+        await this.notificationQueue.add(
+          JOBS.NEW_POST,
+          {
+            post: sentData,
+          },
+          {
+            attempts: 3,
+            backoff: 2000,
+          },
+        );
       }
       return newPost;
     } catch (error) {

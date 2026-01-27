@@ -33,29 +33,29 @@ export class LoggerService extends ConsoleLogger {
       ],
     });
   }
-  error(message: string, trace: string) {
+  error(message: any, trace: string) {
     this.winstonLogger.error('error', message, {
       context: this.context,
       stack: trace,
     });
     super.error(message, trace);
   }
-  warn(message: string) {
+  warn(message: any) {
     this.winstonLogger.warn('warn', message, {
       context: this.context,
     });
     super.warn(message);
   }
-  log(message: string) {
+  log(message: any) {
     this.winstonLogger.log('info', message, {
       context: this.context,
     });
     super.log(message);
   }
-  debug(message: string) {
+  debug(message: any) {
     super.debug(message);
   }
-  verbose(message: string) {
+  verbose(message: any) {
     super.verbose(message);
   }
 }
