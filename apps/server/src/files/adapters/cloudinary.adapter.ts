@@ -1,16 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-
+import { v2 } from 'cloudinary';
 @Injectable()
 export class CloudinaryAdapter {
-  constructor(@Inject('CLOUDINARY') private cloudinary) {}
-
+  constructor(@Inject('CLOUDINARY') private cloudinary: typeof v2) {}
   async upload(file: Express.Multer.File) {
-    return new Promise((res, rej) => {
-      const upload = this.cloudinary.uploader.upload_stream((err, result) => {
-        if (err) rej(err);
-        else res(result);
-      });
-      upload.end(file.buffer);
+    const result = await this.cloudinary.uploader.upload(file.path, {
+      folder: 'meThread',
+      resource_type: 'auto',
     });
+    return result;
   }
 }

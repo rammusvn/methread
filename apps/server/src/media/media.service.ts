@@ -14,7 +14,6 @@ export class MediaService {
     if (files && files.length > 0) {
       for (const file of files) {
         const fileEntity: any = await this.fileService.uploadToCloudinary(file);
-        console.log(fileEntity);
         const newMedia = this.mediaRepository.create({
           post_id: postId,
           url: fileEntity.url,
