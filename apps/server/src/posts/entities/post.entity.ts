@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -50,4 +51,10 @@ export class Post {
 
   @OneToMany(() => Media, (media) => media.post)
   media: Media[];
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

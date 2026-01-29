@@ -29,7 +29,7 @@ export class PostsService {
     const { cursor, limit = 6 } = query;
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
-      .where('post.parent_id is null')
+      .where('post.parent_id is null and post.isActive = true')
       .orderBy('post.id', 'DESC')
       .take(limit + 1)
       .leftJoin('post.author', 'author')
@@ -254,6 +254,8 @@ export class PostsService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    return await this.postRepository.remove(post);
+    await this.postRepository.update(postId, { isActive: false });
+    await this.postRepository.softRemove(post);
+    return post;
   }
 }

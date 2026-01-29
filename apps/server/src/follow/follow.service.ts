@@ -30,11 +30,19 @@ export class FollowService {
       },
     });
     if (follow) {
-      await this.followRepository.remove(follow);
-      await this.userService.decreaseFollowersCount(followingId);
-      await this.userService.decreaseFollowingCount(followerId);
-      return false;
+      if (follow.is_following) {
+        await this.followRepository.update(follow.id, { is_following: false });
+        await this.userService.decreaseFollowersCount(followingId);
+        await this.userService.decreaseFollowingCount(followerId);
+        return false;
+      } else {
+        await this.followRepository.update(follow.id, { is_following: true });
+        await this.userService.increaseFollowersCount(followingId);
+        await this.userService.increaseFollowingCount(followerId);
+        return true;
+      }
     }
+
     const newFollow = this.followRepository.create({
       follower_id: followerId,
       following_id: followingId,
