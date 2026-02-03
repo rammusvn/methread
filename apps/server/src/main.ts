@@ -3,13 +3,16 @@ import { AppModule } from './app.module';
 import session from 'express-session';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 async function bootstrap() {
+  initializeTransactionalContext();
   const isProduction = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
     logger: isProduction
       ? ['error', 'warn', 'log']
       : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
+
   app.enableCors({
     origin: process.env.CLIENT_URL,
     credentials: true,

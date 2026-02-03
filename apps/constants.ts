@@ -20,3 +20,5 @@ export const JOBS = {
   COMMENT_POST: 'COMMENT_POST',
   CREATE_MEDIA: 'CREATE_MEDIA',
 };
+
+export const GRAVITY = 1.8;

@@ -28,7 +28,6 @@ export class PostsService {
   }
   async findAll(query: GetPostsDto) {
     const { cursor, limit = 6 } = query;
-    this.logger.debug('currentCursor : ' + cursor);
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
       .leftJoin('post.author', 'author')
@@ -39,8 +38,10 @@ export class PostsService {
       .where('post.parent_id is null and post.isActive = true')
       .take(limit + 1);
     if (cursor) {
-      queryBuilder.andWhere(' post.rank_score < :cursor', {
-        cursor,
+      const [score, id] = cursor.split('-');
+      queryBuilder.andWhere(' (post.rank_score ,post.id) <( :score ,:id)', {
+        score,
+        id,
       });
     }
     const posts = await queryBuilder.getMany();
@@ -48,7 +49,9 @@ export class PostsService {
     if (hasNextPage) {
       posts.pop();
     }
-    const nextCursor = hasNextPage ? posts[posts.length - 1].rank_score : null;
+    const nextCursor = hasNextPage
+      ? `${posts[posts.length - 1].rank_score}-${posts[posts.length - 1].id}`
+      : null;
     this.logger.debug('NextCursor : ' + nextCursor);
     return {
       posts: posts,
@@ -256,5 +259,16 @@ export class PostsService {
     await this.postRepository.update(postId, { isActive: false });
     await this.postRepository.softRemove(post);
     return post;
+  }
+  async updatePostScores() {
+    await this.postRepository
+      .createQueryBuilder('post')
+      .update()
+      .set({
+        rank_score: () => `1+(likes_count- 1) /
+  POWER(EXTRACT(EPOCH FROM (NOW() - created_at)) / 3600 + 2, ${GRAVITY})`, // Ranking score formula from Hackernews
+      })
+      .where('isActive = true')
+      .execute();
   }
 }
