@@ -5,11 +5,12 @@ import { DataSource, IsNull, Repository } from 'typeorm';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsDto } from './dto/get-post.dto';
-import { JOBS, QUEUES } from 'apps/constants';
+import { GRAVITY, JOBS, QUEUES } from 'apps/constants';
 import { LikesService } from '../reaction/likes/like.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { LoggerService } from '@app/common/logger/my-logger.service';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class PostsService {
@@ -27,16 +28,18 @@ export class PostsService {
   }
   async findAll(query: GetPostsDto) {
     const { cursor, limit = 6 } = query;
+    this.logger.debug('currentCursor : ' + cursor);
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
-      .where('post.parent_id is null and post.isActive = true')
-      .orderBy('post.id', 'DESC')
-      .take(limit + 1)
       .leftJoin('post.author', 'author')
       .leftJoinAndSelect('post.media', 'media')
-      .addSelect(['author.id', 'author.username', 'author.image']);
+      .addSelect(['author.id', 'author.username', 'author.image'])
+      .orderBy('post.rank_score', 'DESC')
+      .addOrderBy('post.id', 'DESC')
+      .where('post.parent_id is null and post.isActive = true')
+      .take(limit + 1);
     if (cursor) {
-      queryBuilder.andWhere(' post.id < :cursor', {
+      queryBuilder.andWhere(' post.rank_score < :cursor', {
         cursor,
       });
     }
@@ -45,7 +48,8 @@ export class PostsService {
     if (hasNextPage) {
       posts.pop();
     }
-    const nextCursor = hasNextPage ? posts[posts.length - 1].id : null;
+    const nextCursor = hasNextPage ? posts[posts.length - 1].rank_score : null;
+    this.logger.debug('NextCursor : ' + nextCursor);
     return {
       posts: posts,
       nextCursor,
@@ -137,11 +141,7 @@ export class PostsService {
     return await query.getMany();
   }
 
-  async create(
-    createPostDto: CreatePostDto,
-    files: Express.Multer.File[],
-    userId: number,
-  ): Promise<Post> {
+  async create(createPostDto: CreatePostDto, userId: number): Promise<Post> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -165,10 +165,9 @@ export class PostsService {
         parent_id: createPostDto.parent_id,
       });
       await this.postRepository.save(newPost);
-      this.logger.debug(files);
       await this.mediaQueue.add(JOBS.CREATE_MEDIA, {
         postId: newPost.id,
-        files: files,
+        media: createPostDto.media,
       });
 
       await queryRunner.commitTransaction();
@@ -213,14 +212,14 @@ export class PostsService {
   async isLike(postId: number, userId: number) {
     return await this.likeService.isLike(postId, userId);
   }
-
+  @Transactional()
   async toggleLike(postId: number, userId: number) {
     const res = await this.likeService.toggle(postId, userId);
-    if (res) {
-      await this.increaseLikeCount(postId);
-    } else {
-      await this.decreaseLikeCount(postId);
-    }
+    return await this.postRepository.increment(
+      { id: postId },
+      'likes_count',
+      res,
+    );
   }
 
   async increaseLikeCount(postId: number) {
