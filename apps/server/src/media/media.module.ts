@@ -6,8 +6,12 @@ import { FilesModule } from '../files/files.module';
 import { BullModule } from '@nestjs/bullmq';
 import { QUEUES } from 'apps/constants';
 import { MediaProcessor } from './media.processor';
+import { MediaController } from './media.controller';
+import { CloudinaryAdapter } from '../files/adapters/cloudinary.adapter';
+import { cloudinaryProvider } from '../files/providers/cloudinary.provider';
 
 @Module({
+  controllers: [MediaController],
   imports: [
     TypeOrmModule.forFeature([Media]),
     FilesModule,
@@ -15,7 +19,12 @@ import { MediaProcessor } from './media.processor';
       name: QUEUES.MEDIA_QUEUE,
     }),
   ],
-  providers: [MediaService, MediaProcessor],
+  providers: [
+    MediaService,
+    MediaProcessor,
+    CloudinaryAdapter,
+    cloudinaryProvider,
+  ],
   exports: [MediaService],
 })
 export class MediaModule {}
