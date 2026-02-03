@@ -6,6 +6,11 @@ import { SavedPost } from '../../../apps/server/src/reaction/save/entities/save.
 import { Follow } from '../../../apps/server/src/follow/entities/follow.entity';
 import { Like } from '../../../apps/server/src/reaction/likes/entities/like.entity';
 import { Media } from '../../../apps/server/src/media/entities/media.entity';
+import {
+  initializeTransactionalContext,
+  addTransactionalDataSource,
+  StorageDriver,
+} from 'typeorm-transactional';
 
 dotenv.config();
 
@@ -19,8 +24,12 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: [Post, User, SavedPost, Follow, Like, Media],
   migrations: [__dirname + '/../migrations/**/*{.js,.ts}'],
   synchronize: false,
-  logging: true,
+  // logging: true,
 };
 const dataSource = new DataSource(dataSourceOptions);
 
+initializeTransactionalContext({
+  storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE,
+});
+addTransactionalDataSource(dataSource);
 export default dataSource;
