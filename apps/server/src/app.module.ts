@@ -27,6 +27,8 @@ import { ReactionModule } from './reaction/reaction.module';
 import { LoggerModule } from '../../../libs/common/src/logger/logger.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
+
 @Module({
   imports: [
     AuthModule,
@@ -38,6 +40,7 @@ import { BullModule } from '@nestjs/bullmq';
     DatabaseModule,
     ReactionModule,
     LoggerModule,
+    ScheduleModule.forRoot(),
     BullModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
         return {
@@ -89,10 +92,10 @@ import { BullModule } from '@nestjs/bullmq';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_PIPE,
-      useClass: FreezePipe,
-    },
+    // {
+    //   provide: APP_PIPE,
+    //   useClass: FreezePipe,
+    // },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

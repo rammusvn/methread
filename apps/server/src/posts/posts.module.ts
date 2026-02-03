@@ -9,10 +9,11 @@ import { BullModule } from '@nestjs/bullmq';
 import { QUEUES } from 'apps/constants';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { PostRanking } from './tasks/post-ranking.task';
 
 @Module({
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, PostRanking],
   imports: [
     TypeOrmModule.forFeature([Post]),
     FilesModule,

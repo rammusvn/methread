@@ -57,4 +57,7 @@ export class Post {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({ default: 0, type: 'float' })
+  rank_score: number;
 }
