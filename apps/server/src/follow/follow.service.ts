@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Follow } from './entities/follow.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class FollowService {
@@ -20,7 +21,8 @@ export class FollowService {
     });
     return !!follow;
   }
-  async toggle(followerId: number, followingId: number) {
+  @Transactional()
+  async toggleFollow(followerId: number, followingId: number) {
     await this.userService.findOne(followingId);
 
     const follow = await this.followRepository.findOne({

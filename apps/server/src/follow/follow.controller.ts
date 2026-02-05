@@ -22,7 +22,7 @@ export class FollowController {
     @Param('targetId', ParseIntPipe) targetId: number,
     @CurrentUser() currentUser: CurrentUserData,
   ) {
-    return this.followService.toggle(currentUser.id, targetId);
+    return this.followService.toggleFollow(currentUser.id, targetId);
   }
 
   @Get('/:targetId/is-following')

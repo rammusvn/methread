@@ -24,7 +24,7 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: [Post, User, SavedPost, Follow, Like, Media],
   migrations: [__dirname + '/../migrations/**/*{.js,.ts}'],
   synchronize: false,
-  // logging: true,
+  logging: true,
 };
 const dataSource = new DataSource(dataSourceOptions);
 

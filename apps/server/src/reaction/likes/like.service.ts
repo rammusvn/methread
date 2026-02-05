@@ -8,7 +8,7 @@ export class LikesService {
   constructor(
     @InjectRepository(Like) private likeRepository: Repository<Like>,
   ) {}
-  async toggle(postId: number, userId: number): Promise<number> {
+  async toggle(postId: number, userId: number): Promise<boolean> {
     const like = await this.likeRepository.findOne({
       where: { post_id: postId, user_id: userId },
     });
@@ -17,16 +17,16 @@ export class LikesService {
       like.is_like = !isLike;
       await this.likeRepository.save(like);
       if (!isLike) {
-        return 1;
+        return true;
       }
-      return -1;
+      return false;
     } else {
       const createdLike = this.likeRepository.create({
         user_id: userId,
         post_id: postId,
       });
       await this.likeRepository.save(createdLike);
-      return 1;
+      return true;
     }
   }
 

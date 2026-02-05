@@ -29,32 +29,27 @@ export class AuthService {
       throw new HttpException('account existed', HttpStatus.CONFLICT);
     }
     const hashedPassword = await this.hashPassword(registerDto.password!);
-    return this.usersService.create({
+    const newUser = await this.usersService.create({
       ...registerDto,
       password: hashedPassword,
     });
+    const { password, ...returnUser } = newUser;
+    return returnUser;
   }
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findOneByEmail(email);
-    if (!user) {
-      throw new HttpException('account not existed', HttpStatus.NOT_FOUND);
-    }
+    const hashedPassword = user?.password || '$2b$10$fakehashsecret...';
     const isPasswordValid = await this.comparePassword(
       password,
-      user?.password || '',
+      hashedPassword,
     );
-
-    if (user && isPasswordValid) {
-      const { password, ...result } = user;
-      return result;
+    if (!user || !isPasswordValid) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    if (user?.password !== password) {
-      throw new HttpException('Password incorrect', HttpStatus.UNAUTHORIZED);
-    }
-
-    return null;
+    const { password: _, ...result } = user;
+    return result;
   }
 
   login(user: User) {

@@ -64,13 +64,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'product', 'test').required(),
-
-        PORT: Joi.number().port().required(),
-
+        NODE_ENV: Joi.string().valid('dev', 'production', 'test').required(),
         JWT_SECRET: Joi.string().min(5).required(),
-
         SESSION_SECRET: Joi.string().min(5).required(),
+        PORT: Joi.number().port().required(),
 
         DB_TYPE: Joi.string().required(),
         DB_HOST: Joi.string().hostname().required(),
@@ -85,6 +82,12 @@ import { ScheduleModule } from '@nestjs/schedule';
         MEZON_TOKEN_URL: Joi.string().uri().required(),
         MEZON_CALLBACK_URL: Joi.string().uri().required(),
         MEZON_USER_URL: Joi.string().uri().required(),
+
+        REDIS_URL: Joi.string().required(),
+        REDIS_HOST: Joi.string().hostname().required(),
+        REDIS_PORT: Joi.number().port().required(),
+
+        CLIENT_URL: Joi.string().uri().required(),
       }),
     }),
     NotificationsModule,

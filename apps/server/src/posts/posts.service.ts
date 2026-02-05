@@ -143,11 +143,9 @@ export class PostsService {
       .leftJoinAndSelect('post.media', 'media');
     return await query.getMany();
   }
-
+  @Transactional()
   async create(createPostDto: CreatePostDto, userId: number): Promise<Post> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    let newPost: Post;
     try {
       if (createPostDto.parent_id) {
         const parent = await this.postRepository.findOneBy({
@@ -162,18 +160,23 @@ export class PostsService {
           1,
         );
       }
-      const newPost = this.postRepository.create({
+      newPost = this.postRepository.create({
         content: createPostDto.content,
         author_id: userId,
         parent_id: createPostDto.parent_id,
       });
       await this.postRepository.save(newPost);
-      await this.mediaQueue.add(JOBS.CREATE_MEDIA, {
-        postId: newPost.id,
-        media: createPostDto.media,
-      });
-
-      await queryRunner.commitTransaction();
+      if (createPostDto.media && createPostDto.media.length > 0) {
+        await this.mediaQueue.add(JOBS.CREATE_MEDIA, {
+          postId: newPost.id,
+          media: createPostDto.media,
+        });
+      }
+    } catch (error) {
+      this.logger.error(error, 'failed to create post');
+      throw new HttpException('failed to create post', 500);
+    }
+    try {
       if (!createPostDto.parent_id) {
         const sentData = await this.findOneById(newPost.id);
         await this.notificationQueue.add(
@@ -187,14 +190,12 @@ export class PostsService {
           },
         );
       }
-      return newPost;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error(error, 'failed to create post');
-      throw new HttpException('failed to create post', 500);
-    } finally {
-      await queryRunner.release();
+      this.logger.warn('failed send notification');
+      this.logger.log(error);
+      throw new HttpException('failed to send notification', 500);
     }
+    return newPost;
   }
 
   async update(postId: number, updatePostDto: UpdatePostDto, userId: number) {
@@ -218,11 +219,19 @@ export class PostsService {
   @Transactional()
   async toggleLike(postId: number, userId: number) {
     const res = await this.likeService.toggle(postId, userId);
-    return await this.postRepository.increment(
-      { id: postId },
-      'likes_count',
-      res,
-    );
+    if (res) {
+      return await this.postRepository.increment(
+        { id: postId },
+        'likes_count',
+        1,
+      );
+    } else {
+      return await this.postRepository.decrement(
+        { id: postId },
+        'likes_count',
+        1,
+      );
+    }
   }
 
   async increaseLikeCount(postId: number) {

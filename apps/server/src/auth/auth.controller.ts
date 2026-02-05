@@ -36,7 +36,8 @@ export class AuthController {
     const { access_token } = this.authService.login(req.user);
     response.cookie('access_token', access_token, {
       httpOnly: true,
-      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 24 hours
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
     });
     return { message: 'Login successful' };
   }
