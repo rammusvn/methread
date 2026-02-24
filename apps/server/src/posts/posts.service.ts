@@ -26,13 +26,13 @@ export class PostsService {
   ) {
     this.logger.setContext(PostsService.name);
   }
-  async findAll(query: GetPostsDto) {
+  async findAll(query: GetPostsDto, userId: number) {
     const { cursor, limit = 6 } = query;
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
       .leftJoin('post.author', 'author')
-      .leftJoinAndSelect('post.media', 'media')
       .addSelect(['author.id', 'author.username', 'author.image'])
+      .leftJoinAndSelect('post.media', 'media')
       .orderBy('post.rank_score', 'DESC')
       .addOrderBy('post.id', 'DESC')
       .where('post.parent_id is null and post.isActive = true')
@@ -43,6 +43,20 @@ export class PostsService {
         score,
         id,
       });
+    }
+    if (userId) {
+      queryBuilder
+        .leftJoin('post.likes', 'likes', 'likes.user_id = :userId', { userId })
+        .addSelect(['likes.is_like'])
+        .leftJoin(
+          'post.savedPosts',
+          'savedPosts',
+          'savedPosts.user_id = :userId',
+          {
+            userId,
+          },
+        )
+        .addSelect(['savedPosts.is_saved']);
     }
     const posts = await queryBuilder.getMany();
     const hasNextPage = posts.length > limit;
@@ -95,52 +109,84 @@ export class PostsService {
       },
     });
   }
-  async findAllParentPostByUserId(userId: number): Promise<Post[]> {
-    return await this.postRepository.find({
-      where: { author_id: userId, parent_id: IsNull() },
-      relations: {
-        author: true,
-        media: true,
-      },
-      select: {
-        author: {
-          id: true,
-          username: true,
-          image: true,
+  async findAllParentPostByUserId(
+    userId: number,
+    currentUserId: number,
+  ): Promise<Post[]> {
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoin('post.author', 'author')
+      .addSelect(['author.id', 'author.username', 'author.image'])
+      .leftJoinAndSelect('post.media', 'media')
+      .where(
+        'post.parent_id is not null and post.isActive = true and post.author_id = :userId',
+        {
+          userId,
         },
-      },
-      order: {
-        id: 'DESC',
-      },
-    });
+      );
+    if (currentUserId) {
+      queryBuilder
+        .leftJoin('post.likes', 'likes', 'likes.user_id = :currentUserId', {
+          currentUserId,
+        })
+        .addSelect(['likes.is_like'])
+        .leftJoin(
+          'post.savedPosts',
+          'savedPosts',
+          'savedPosts.user_id = :currentUserId',
+          {
+            currentUserId,
+          },
+        )
+        .addSelect(['savedPosts.is_saved']);
+    }
+    const result = queryBuilder.getMany();
+    return result;
   }
 
-  async findAllByParentId(parentId: number): Promise<Post[]> {
-    return await this.postRepository.find({
-      where: { parent_id: parentId },
-      relations: {
-        author: true,
-        media: true,
-      },
-      select: {
-        author: {
-          id: true,
-          username: true,
-          image: true,
-        },
-      },
-    });
+  async findAllByParentId(parentId: number, userId: number): Promise<Post[]> {
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoin('post.author', 'author')
+      .addSelect(['author.id', 'author.username', 'author.image'])
+      .leftJoinAndSelect('post.media', 'media')
+      .where('post.parent_id = :parentId and post.isActive = true', {
+        parentId,
+      });
+    if (userId) {
+      queryBuilder
+        .leftJoin('post.likes', 'likes', 'likes.user_id = :userId', { userId })
+        .addSelect(['likes.is_like'])
+        .leftJoin(
+          'post.savedPosts',
+          'savedPosts',
+          'savedPosts.user_id = :userId',
+          {
+            userId,
+          },
+        )
+        .addSelect(['savedPosts.is_saved']);
+    }
+    const result = queryBuilder.getMany();
+    return result;
   }
 
   async findAllSavedPostByUserId(userId: number) {
     const query = this.postRepository.createQueryBuilder('post');
     query
-      .innerJoin('saved_post', 'saved_post', 'saved_post.post_id = post.id')
+      .innerJoin(
+        'post.savedPosts',
+        'saved_post',
+        'saved_post.post_id = post.id',
+      )
       .where('saved_post.user_id = :userId', { userId })
       .andWhere('saved_post.is_saved = :isSaved', { isSaved: true })
+      .addSelect(['saved_post.is_saved'])
       .leftJoin('post.author', 'author')
       .addSelect(['author.id', 'author.username', 'author.image'])
-      .leftJoinAndSelect('post.media', 'media');
+      .leftJoinAndSelect('post.media', 'media')
+      .leftJoin('post.likes', 'likes', 'likes.user_id = :userId', { userId })
+      .addSelect(['likes.is_like']);
     return await query.getMany();
   }
   @Transactional()
