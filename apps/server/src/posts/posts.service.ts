@@ -1,16 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { DataSource, IsNull, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsDto } from './dto/get-post.dto';
 import { GRAVITY, JOBS, QUEUES } from 'apps/constants';
 import { LikesService } from '../reaction/likes/like.service';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { LoggerService } from '@app/common/logger/my-logger.service';
 import { Transactional } from 'typeorm-transactional';
+import { QueueService } from '@app/common/queue/queue.service';
 
 @Injectable()
 export class PostsService {
@@ -19,10 +18,7 @@ export class PostsService {
     private readonly likeService: LikesService,
     private readonly dataSource: DataSource,
     private readonly logger: LoggerService,
-    @InjectQueue(QUEUES.NOTIFICATION_QUEUE)
-    private readonly notificationQueue: Queue,
-    @InjectQueue(QUEUES.MEDIA_QUEUE)
-    private readonly mediaQueue: Queue,
+    private readonly queueService: QueueService,
   ) {
     this.logger.setContext(PostsService.name);
   }
@@ -119,7 +115,7 @@ export class PostsService {
       .addSelect(['author.id', 'author.username', 'author.image'])
       .leftJoinAndSelect('post.media', 'media')
       .where(
-        'post.parent_id is not null and post.isActive = true and post.author_id = :userId',
+        'post.parent_id is null and post.isActive = true and post.author_id = :userId',
         {
           userId,
         },
@@ -213,7 +209,7 @@ export class PostsService {
       });
       await this.postRepository.save(newPost);
       if (createPostDto.media && createPostDto.media.length > 0) {
-        await this.mediaQueue.add(JOBS.CREATE_MEDIA, {
+        await this.queueService.add(QUEUES.MEDIA_QUEUE, JOBS.CREATE_MEDIA, {
           postId: newPost.id,
           media: createPostDto.media,
         });
@@ -225,16 +221,9 @@ export class PostsService {
     try {
       if (!createPostDto.parent_id) {
         const sentData = await this.findOneById(newPost.id);
-        await this.notificationQueue.add(
-          JOBS.NEW_POST,
-          {
-            post: sentData,
-          },
-          {
-            attempts: 3,
-            backoff: 2000,
-          },
-        );
+        await this.queueService.add(QUEUES.NOTIFICATION_QUEUE, JOBS.NEW_POST, {
+          post: sentData,
+        });
       }
     } catch (error) {
       this.logger.warn('failed send notification');

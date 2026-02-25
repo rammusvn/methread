@@ -5,9 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { FilesModule } from '../files/files.module';
 import { ReactionModule } from '../reaction/reaction.module';
-import { BullModule } from '@nestjs/bullmq';
-import { QUEUES } from 'apps/constants';
 import { PostRanking } from './tasks/post-ranking.task';
+import { QueueModule } from '@app/common/queue/queue.module';
 
 @Module({
   controllers: [PostsController],
@@ -16,14 +15,7 @@ import { PostRanking } from './tasks/post-ranking.task';
     TypeOrmModule.forFeature([Post]),
     FilesModule,
     ReactionModule,
-    BullModule.registerQueue(
-      {
-        name: QUEUES.NOTIFICATION_QUEUE,
-      },
-      {
-        name: QUEUES.MEDIA_QUEUE,
-      },
-    ),
+    QueueModule,
   ],
 })
 export class PostsModule {}

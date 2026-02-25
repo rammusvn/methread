@@ -48,6 +48,12 @@ import { ScheduleModule } from '@nestjs/schedule';
             host: configService.getOrThrow<string>('REDIS_HOST'),
             port: configService.getOrThrow<number>('REDIS_PORT'),
           },
+          defaultJobOptions: {
+            attempts: 3,
+            backoff: 3000,
+            removeOnComplete: true,
+            removeOnFail: false,
+          },
         };
       },
       inject: [ConfigService],
