@@ -10,7 +10,7 @@ import { LikesService } from '../reaction/likes/like.service';
 import { LoggerService } from '@app/common/logger/my-logger.service';
 import { Transactional } from 'typeorm-transactional';
 import { QueueService } from '@app/common/queue/queue.service';
-
+import { Snowflake } from 'nodejs-snowflake';
 @Injectable()
 export class PostsService {
   constructor(
@@ -188,6 +188,7 @@ export class PostsService {
   @Transactional()
   async create(createPostDto: CreatePostDto, userId: number): Promise<Post> {
     let newPost: Post;
+    const uid = new Snowflake();
     try {
       if (createPostDto.parent_id) {
         const parent = await this.postRepository.findOneBy({
@@ -203,6 +204,7 @@ export class PostsService {
         );
       }
       newPost = this.postRepository.create({
+        id: parseInt(uid.getUniqueID().toString()),
         content: createPostDto.content,
         author_id: userId,
         parent_id: createPostDto.parent_id,

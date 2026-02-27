@@ -27,7 +27,7 @@
     "prepare": "cd .. && husky server/.husky",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:gen": "npm run typeorm -- migration:generate -d libs/database/config/typeorm.ts libs/database/migrations/migration",
-    "migration:create": "npm run typeorm -- migration:create libs/database/migrations/$npm_config_name",
+    "migration:create": "npm run typeorm -- migration:create libs/database/migrations/migration",
     "migration:revert": "npm run typeorm -- migration:revert -d libs/database/config/typeorm.ts ",
     "migration:run": "npm run typeorm -- migration:run -d libs/database/config/typeorm.ts"
   },
@@ -70,6 +70,7 @@
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
     "nest-winston": "^1.10.2",
+    "nodejs-snowflake": "^2.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
