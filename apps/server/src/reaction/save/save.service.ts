@@ -9,7 +9,6 @@ export class SaveService {
     @InjectRepository(SavedPost)
     private savedPostRepository: Repository<SavedPost>,
   ) {}
-
   async isSaved(postId: number, userId: number) {
     const savedPost = await this.savedPostRepository.findOne({
       where: { post_id: postId, user_id: userId },
