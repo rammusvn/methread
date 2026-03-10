@@ -1,4 +1,4 @@
-name: MeBlox deployment
+name: MeBlox release
 
 on:
   push:
