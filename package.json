@@ -12,7 +12,7 @@
     ]
   },
   "scripts": {
-    "build": "nest build server && nest build otifications",
+    "build": "nest build server && nest build notifications",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "concurrently \"nest start \" \"nest start notifications\"",
     "start:dev": "concurrently \"nest start --watch\" \"nest start notifications --watch\"",
